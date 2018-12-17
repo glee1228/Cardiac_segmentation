@@ -1,0 +1,11 @@
+tmp/ckpt/
+tmp/log/train/
+tmp/log/test/
+data_sphere/
+__pycache__
+*.jpg
+*.h5
+*.mha
+.DS_Store
+tmp/.DS_Store
+tmp/log/.DS_Store
