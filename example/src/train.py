@@ -73,7 +73,7 @@ def train():
         with tf.device('/cpu:0'):
             # create transformations to image and labels
             trainTransforms = [
-                NiftiDataset.StatisticalNormalization(2.5),
+                NiftiDataset.StatisticalNormalization(FLAGS.sigma,FLAGS.max_sd_coe, FLAGS.min_sd_coe),
                 # NiftiDataset.Normalization(),
                 NiftiDataset.Resample((0.5,0.5,0.5)),
                 NiftiDataset.Padding((FLAGS.patch_size, FLAGS.patch_size, FLAGS.patch_layer)),
@@ -94,7 +94,7 @@ def train():
             trainDataset = trainDataset.batch(FLAGS.batch_size)
 
             testTransforms = [
-                NiftiDataset.StatisticalNormalization(2.5),
+                NiftiDataset.StatisticalNormalization(FLAGS.sigma, FLAGS.max_sd_coe, FLAGS.min_sd_coe),
                 # NiftiDataset.Normalization(),
                 NiftiDataset.Resample((0.5,0.5,0.5)),
                 NiftiDataset.Padding((FLAGS.patch_size, FLAGS.patch_size, FLAGS.patch_layer)),
@@ -368,10 +368,10 @@ if __name__=='__main__':
     parser.add_argument('--patch_layer',type=int, default=64,
                     help='Number of layers in data patch')
 
-    parser.add_argument('--epochs',type=int, default=50,
+    parser.add_argument('--epochs',type=int, default=30,
                     help='Number of epochs for training')
 
-    parser.add_argument('--init_learning_rate',type=float, default=0.029,
+    parser.add_argument('--init_learning_rate',type=float, default=0.02,
                     help='Initial learning rate')
 
     parser.add_argument('--decay_factor',type=float, default=0.07,
@@ -409,5 +409,25 @@ if __name__=='__main__':
 
     parser.add_argument('--momentum',type=float,default=0.5,
                     help='Momentum used in optimization')
+
+    parser.add_argument('--max_sd_coe',type=float,default=3,
+                    help='maximum standard deviation coefficient')
+
+    parser.add_argument('--min_sd_coe',type=float,default=0.5,
+                    help='minimum standard deviation coefficient')
+
+    parser.add_argument('--sigma', type=float, default=0.5,
+                        help='Standard deviation')
+
     FLAGS, unparsed = parser.parse_known_args()
     tf.app.run(main=main,argv=[sys.argv[0]]+unparsed)
+    print('************ HYPER PARAMETETR ***************')
+    print('max_sd_coe : ',FLAGS.max_sd_coe, 'min_sd_coe : ', FLAGS.min_sd_coe)
+    print('EPOCHS : ', FLAGS.epochs)
+    print('init learning rate :', FLAGS.init_learning_rate)
+    print('drop_ratio :', FLAGS.drop_ratio)
+    print('patch_size :', FLAGS.patch_size)
+    print('patch_layer :', FLAGS.patch_layer)
+    print('sigma :', FLAGS.sigma)
+
+    print('*********************************************')

@@ -38,7 +38,7 @@ def evaluate():
     # create transformations to image and labels
     transforms = [
         # NiftiDataset.Normalization(),
-        NiftiDataset.StatisticalNormalization(2.5),
+        NiftiDataset.StatisticalNormalization(FLAGS.sigma,FLAGS.max_sd_coe, FLAGS.min_sd_coe),
         NiftiDataset.Resample(0.25),
         NiftiDataset.Padding((FLAGS.patch_size, FLAGS.patch_size, FLAGS.patch_layer))      
         ]
@@ -53,12 +53,14 @@ def evaluate():
         print("{}: Restore checkpoint success".format(datetime.datetime.now()))
 
 
-        for i in os.listdir(FLAGS.data_dir):
+        for file_name in os.listdir(FLAGS.data_dir):
             # ops to load data
-            if FLAGS.image_filename in i:
+            if FLAGS.image_filename in file_name:
                 # check image data exists
-                image_path = os.path.join(FLAGS.data_dir,i)
-                output_path = os.path.join(FLAGS.output_dir,i)
+                image_path = os.path.join(FLAGS.data_dir,file_name)
+                image_split = file_name.split(".")
+                output_filename = image_split[0]+'_output.mha'
+                output_path = os.path.join(FLAGS.output_dir,output_filename)
                 if not os.path.exists(image_path):
                     print("{}: Image file not found at {}".format(datetime.datetime.now(),image_path))
                     break
@@ -242,6 +244,15 @@ if __name__=='__main__':
 
     parser.add_argument('--batch_size', type=int, default=1,
                         help='Setting batch size (currently only accept 1)')
+
+    parser.add_argument('--max_sd_coe', type=float, default=3,
+                        help='maximum standard deviation coefficient')
+
+    parser.add_argument('--min_sd_coe', type=float, default=0.5,
+                        help='minimum standard deviation coefficient')
+
+    parser.add_argument('--sigma', type=float, default=0.5,
+                        help='Standard deviation')
 
     FLAGS, unparsed = parser.parse_known_args()
     tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)

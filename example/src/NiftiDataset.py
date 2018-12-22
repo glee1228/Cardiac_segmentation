@@ -38,8 +38,8 @@ class NiftiDataset(object):
       for i in sorted(os.listdir(self.data_dir+'/image')):
         if self.image_filename in i:
           image_paths.append(os.path.join(self.data_dir,'image',i))
-    if 'label' in sorted(os.listdir(self.data_dir)):
-      for i in os.listdir(self.data_dir+'/label'):
+    if 'label' in os.listdir(self.data_dir):
+      for i in sorted(os.listdir(self.data_dir+'/label')):
         if self.label_filename in i:
           label_paths.append(os.path.join(self.data_dir,'label',i))
 
@@ -62,7 +62,7 @@ class NiftiDataset(object):
   def input_parser(self,image_path, label_path):
     # read image and label
     image = self.read_image(image_path.decode("utf-8"))
-
+    image.SetSpacing((0.28,0.28,0.4))
      # cast image and label
     castImageFilter = sitk.CastImageFilter()
     castImageFilter.SetOutputPixelType(sitk.sitkInt16)
@@ -122,10 +122,12 @@ class StatisticalNormalization(object):
   Normalize an image by mapping intensity with intensity distribution
   """
 
-  def __init__(self, sigma):
+  def __init__(self, sigma, max_sd, min_sd):
     self.name = 'StatisticalNormalization'
     assert isinstance(sigma, float)
     self.sigma = sigma
+    self.max_sd = max_sd
+    self.min_sd = min_sd
 
   def __call__(self, sample):
     image, label = sample['image'], sample['label']
@@ -135,8 +137,11 @@ class StatisticalNormalization(object):
     intensityWindowingFilter = sitk.IntensityWindowingImageFilter()
     intensityWindowingFilter.SetOutputMaximum(255)
     intensityWindowingFilter.SetOutputMinimum(0)
-    intensityWindowingFilter.SetWindowMaximum(statisticsFilter.GetMean()+self.sigma*statisticsFilter.GetSigma());
-    intensityWindowingFilter.SetWindowMinimum(statisticsFilter.GetMean()-self.sigma*statisticsFilter.GetSigma());
+    npImage = sitk.GetArrayFromImage(image)
+    # value2, count2 = np.unique(npImage, return_counts=True)
+    # print('image value : '+str(value2[720])+' image Count : '+ str(count2[720]))
+    intensityWindowingFilter.SetWindowMaximum(statisticsFilter.GetMean()+self.max_sd*self.sigma*statisticsFilter.GetSigma());
+    intensityWindowingFilter.SetWindowMinimum(statisticsFilter.GetMean()-self.min_sd*self.sigma*statisticsFilter.GetSigma());
 
     image = intensityWindowingFilter.Execute(image)
 
