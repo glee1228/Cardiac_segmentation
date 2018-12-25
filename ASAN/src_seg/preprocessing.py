@@ -85,6 +85,7 @@ def gen_data(df):
 
 class Preprocess(object):
     def __init__(self):
+        self.num_labels = 3  ##label num ==3
         self.num_channels = 1
 
         self.datagen = ImageDataGenerator(
@@ -258,6 +259,10 @@ class Preprocess(object):
             resize_factor = (reduction_factor, reduction_factor, reduction_factor)
             crop_image = ndimage.zoom(crop_image, resize_factor + (1.,), order=0, mode='constant', cval=0.0)
             crop_label = ndimage.zoom(crop_label, resize_factor + (1.,), order=0, mode='constant', cval=0.0)
+        # img = sitk.GetImageFromArray(crop_image)
+        # mask = sitk.GetImageFromArray(crop_label)
+        # sitk.WriteImage(img, '/home/pirl/Downloads/cardiac/data/test_output/2.mha', True)
+        # sitk.WriteImage(mask, '/home/pirl/Downloads/cardiac/data/test_output/2_M.mha', True)
         crop_image = np.expand_dims(crop_image, 0)
         crop_label = np.expand_dims(crop_label, 0)
         return [crop_image, crop_label]
@@ -268,6 +273,6 @@ class Preprocess(object):
             break
         for mask in self.datagen.flow(list_img_mask[1], batch_size=1, seed=seed):
             break
-        # print('input image shape :',img.shape)
-        # print('input label shape :',mask.shape)
+        #print('input image shape :',img.shape)
+        #print('input label shape :',mask.shape)
         return [img, mask]

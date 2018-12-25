@@ -11,6 +11,7 @@ from model import average_dice_coef, average_dice_coef_loss
 import numpy as np
 from matplotlib import pyplot as plt
 from show import myshow2d
+from preprocessing import Preprocess
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--save_weights_path", type = str, default='/home/pirl/Downloads/cardiac/data/model')
@@ -18,7 +19,7 @@ parser.add_argument("--epoch_number", type = int, default =5)
 parser.add_argument("--test_path", type = str , default = "/home/pirl/Downloads/cardiac/data/test/CHD")
 parser.add_argument("--test_filename",type =str, default = "_dia.mha")
 parser.add_argument("--output_path", type = str , default = "/home/pirl/Downloads/cardiac/data/output/CHD")
-parser.add_argument("--model_name", type = str , default = "/home/pirl/Downloads/cardiac/data/model/CHD_dia/checkpoint_chd.h5")
+parser.add_argument("--model_name", type = str , default = "/home/pirl/Downloads/cardiac/data/model/CHD_dia/checkpoint_seg_chd.h5")
 parser.add_argument("--n_classes", type=int, default=4)
 
 FLAGS, unparsed = parser.parse_known_args()
@@ -64,9 +65,14 @@ test = intensityWindowingFilter.Execute(test)
 test_np = sitk.GetArrayFromImage(test).astype('float32')
 resize_factor = test.GetSpacing()[::-1]
 test_np = ndimage.zoom(test_np, resize_factor, order=0, mode='constant', cval=0.0)
-
-ttt = sitk.GetImageFromArray(test_np)
-sitk.WriteImage(ttt, '/home/pirl/Downloads/cardiac/data/test_output/1.mha', True)
+print('inference input image shape :',test_np.shape)
+#
+# ttt = sitk.GetImageFromArray(test_np)
+# size 46 52 53 image
+#test_np=sitk.ReadImage('/home/pirl/Downloads/cardiac/data/test_output/2.mha')
+# size 512 512 171 image
+#test_np = sitk.ReadImage('/home/pirl/Downloads/cardiac/data/train/CHD/image/sample_dia.mha')
+#test_np=sitk.GetArrayFromImage(test_np)
 #dimension expand : equal to train dataset
 test_np = np.expand_dims(test_np, -1)
 test_np = np.expand_dims(test_np, 0)
@@ -75,27 +81,23 @@ model = load_model(model_name, custom_objects={
     'average_dice_coef_loss': average_dice_coef_loss,
     'average_dice_coef' : average_dice_coef
 })
+#model=load_model(model_name)
 
 predictions = model.predict(test_np, verbose=1)
 #yhat = model.predict_classes(test_np)
-
 print('predict :'+str(predictions.shape))
 predictions = np.squeeze(predictions,axis=0)
 print('predict image shape :',predictions.shape)
 #print('predict image GetValue :',predictions[:,:,])
-predictions = sitk.GetImageFromArray(predictions)
-sitk.WriteImage(predictions, '/home/pirl/Downloads/cardiac/data/test_output/1_M.mha', True)
+mask_dummy = np.zeros((predictions.shape[0],predictions.shape[1],predictions.shape[2]))
+mask_dummy[:, :, :][predictions[:,:,:,0] == 1] = 1.
+mask_dummy[:, :, :][predictions[:,:,:,1] == 1] = 2.
+mask_dummy[:, :, :][predictions[:,:,:,2] == 1] = 3.
 
 
 
-
-
-
-
-
-
-
-
+predictions = sitk.GetImageFromArray(mask_dummy)
+sitk.WriteImage(predictions, '/home/pirl/Downloads/cardiac/data/test_output/2_M.mha', True)
 #print('predict sitk image shape :',predictions.GetSize())
 #myshow2d(predictions[:,:,34])
 

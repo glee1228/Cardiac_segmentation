@@ -85,6 +85,7 @@ def gen_data(df):
 
 class Preprocess(object):
     def __init__(self):
+        self.num_labels = 1  ##label num ==2
         self.num_channels = 1
 
         self.datagen = ImageDataGenerator(

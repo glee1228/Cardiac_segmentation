@@ -18,7 +18,7 @@ parser.add_argument("--epoch_number", type = int, default =5)
 parser.add_argument("--test_path", type = str , default = "/home/pirl/Downloads/cardiac/data/test/CHD")
 parser.add_argument("--test_filename",type =str, default = "_dia.mha")
 parser.add_argument("--output_path", type = str , default = "/home/pirl/Downloads/cardiac/data/output/CHD")
-parser.add_argument("--model_name", type = str , default = "/home/pirl/Downloads/cardiac/data/model/CHD_dia/checkpoint_chd.h5")
+parser.add_argument("--model_name", type = str , default = "/home/pirl/Downloads/cardiac/data/model/CHD_dia/checkpoint_roi_chd.h5")
 parser.add_argument("--n_classes", type=int, default=4)
 
 FLAGS, unparsed = parser.parse_known_args()
@@ -78,7 +78,6 @@ model = load_model(model_name, custom_objects={
 
 predictions = model.predict(test_np, verbose=1)
 #yhat = model.predict_classes(test_np)
-
 print('predict :'+str(predictions.shape))
 predictions = np.squeeze(predictions,axis=0)
 print('predict image shape :',predictions.shape)
