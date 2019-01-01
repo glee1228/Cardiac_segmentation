@@ -68,7 +68,7 @@ df = MapDataComponent(df, process.sample_z_norm, index=0)
 df = MapDataComponent(df, process.simple_preprocess_mask, index=1)
 df = MapData(df, process.resize_whole)
 df = MapData(df, process.data_aug)
-df = PrefetchData(df, 2, 1)
+df = PrefetchData(df, 8, 4)
 
 gen_train = gen_data(df)
 
@@ -82,7 +82,7 @@ cbs.append(CSVLogger('{}/checkpoint.log'.format(FLAGS.checkpoint_dir), append=Tr
 history = model.fit_generator(generator=gen_train,
                     steps_per_epoch=len(image_filelist),
                     epochs=FLAGS.epochs,
-                    max_queue_size=1,
-                    workers=1,
+                    max_queue_size=4,
+                    workers=4,
                     use_multiprocessing=False,
                     callbacks=cbs)
