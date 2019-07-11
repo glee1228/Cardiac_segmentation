@@ -8,13 +8,7 @@
 ├── Asan_result
    └── src
        ├── data_augment.py
-           ├── 000001.jpg 
-           ├── 000002.jpg
-           └── ...
        ├── inference.py
-           ├── a.jpg (The test image that you wanted)
-           ├── b.png
-           └── ...
        ├── preprocessing.py
        ├── show.py
        ├── test2.py
