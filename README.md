@@ -1,3 +1,6 @@
+## Data
+<img src="https://github.com/glee1228/Cardiac_segmentation/blob/master/data_description.jpg" width="450">
+<img src="https://github.com/glee1228/Cardiac_segmentation/blob/master/seg_example.jpg" width="550">
 
 ## Usage
 
